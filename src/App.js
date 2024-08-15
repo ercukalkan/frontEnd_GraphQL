@@ -61,10 +61,14 @@ class App extends Component {
     const graphqlQuery = {
       query: `
         {
-          login(email: "${authData.email}", password: "${authData.password}") {
-            token
-            userId
-          }
+          login(
+            email: "${authData.email}", 
+            password: "${authData.password}"
+          ) 
+            {
+              token
+              userId
+            }
         }
       `
     };
@@ -121,15 +125,12 @@ class App extends Component {
       query: `
         mutation {
           createUser(
-            userInput: {
-              email: "${authData.signupForm.email.value}"
-              name: "${authData.signupForm.password.value}"
-              password: "${authData.signupForm.name.value}"
-            }
+            email: "${authData.signupForm.email.value}"
+            name: "${authData.signupForm.password.value}"
+            password: "${authData.signupForm.name.value}"
           ) {
-            _id
-            email
-            status
+              id
+              email
           }
         }
       `
