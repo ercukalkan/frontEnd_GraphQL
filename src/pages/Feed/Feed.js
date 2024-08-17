@@ -122,19 +122,19 @@ class Feed extends Component {
     let graphqlQuery = {
       query: `
         mutation {
-          createPost(postInput: {
+          createPost(
+            userId: "${localStorage.userId}",
             title: "${postData.title}",
             content: "${postData.content}",
             imageUrl: "some url"
-          }) {
-            _id
+          ) {
+            id
             title
             content
             imageUrl
             creator {
               name
             }
-            createdAt
           }
         }
       `
@@ -160,14 +160,6 @@ class Feed extends Component {
         if (resData.errors) {
           throw new Error('post creation failed');
         }
-        console.log(resData);
-        const post = {
-          _id: resData.post._id,
-          title: resData.post.title,
-          content: resData.post.content,
-          creator: resData.post.creator,
-          createdAt: resData.post.createdAt
-        };
         this.setState(prevState => {
           return {
             isEditing: false,
