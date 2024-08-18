@@ -50,10 +50,36 @@ class Feed extends Component {
       page--;
       this.setState({ postPage: page });
     }
-    fetch('http://localhost:8080/feed/posts?page=' + page, {
+
+    const userId = localStorage.getItem('userId');
+
+    const graphqlQuery = {
+      query: `
+        {
+          getPosts(
+            id: "${userId}"
+          ) {
+            id
+            title
+            content
+            imageUrl
+            creator {
+              id
+              name
+            }
+            createdAt
+            updatedAt
+          }
+        }
+      `
+    };
+    fetch('http://localhost:8080/graphql', {
+      method: 'POST',
       headers: {
-        Authorization: 'Bearer ' + this.props.token
-      }
+        'Authorization': 'Bearer ' + this.props.token,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(graphqlQuery)
     })
       .then(res => {
         if (res.status !== 200) {
@@ -63,7 +89,7 @@ class Feed extends Component {
       })
       .then(resData => {
         this.setState({
-          posts: resData.posts.map(post => {
+          posts: resData.data.getPosts.map(post => {
             return {
               ...post,
               imagePath: post.imageUrl
@@ -119,11 +145,13 @@ class Feed extends Component {
     formData.append('content', postData.content);
     formData.append('image', postData.image);
 
+    const userId = localStorage.getItem('userId');
+
     let graphqlQuery = {
       query: `
         mutation {
           createPost(
-            userId: "${localStorage.userId}",
+            userId: "${userId}",
             title: "${postData.title}",
             content: "${postData.content}",
             imageUrl: "some url"
@@ -168,6 +196,7 @@ class Feed extends Component {
           };
         });
       })
+      .then(() => window.location.reload())
       .catch(err => {
         console.log(err);
         this.setState({

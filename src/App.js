@@ -92,15 +92,14 @@ class App extends Component {
         if (resData.errors) {
           throw new Error('user login failed');
         }
-        console.log(resData);
+        localStorage.setItem('token', resData.data.login.token);
+        localStorage.setItem('userId', resData.data.login.userId);
         this.setState({
           isAuth: true,
           token: resData.data.login.token,
           authLoading: false,
           userId: resData.data.login.userId
         });
-        localStorage.setItem('token', resData.data.login.token);
-        localStorage.setItem('userId', resData.data.login.userId);
         const remainingMilliseconds = 60 * 60 * 1000;
         const expiryDate = new Date(
           new Date().getTime() + remainingMilliseconds
