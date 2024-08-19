@@ -214,11 +214,28 @@ class Feed extends Component {
 
   deletePostHandler = postId => {
     this.setState({ postsLoading: true });
-    fetch('http://localhost:8080/feed/post/' + postId, {
-      method: 'DELETE',
+    const graphqlQuery = {
+      query: `
+        mutation {
+          deletePost (
+            id: "${postId}", 
+            userId: "${localStorage.userId}"
+          ) 
+            {
+              id
+              title
+              content
+            }
+        }
+      `
+    };
+    fetch('http://localhost:8080/graphql', {
+      method: 'POST',
       headers: {
-        Authorization: 'Bearer ' + this.props.token
-      }
+        'Authorization': 'Bearer ' + this.props.token,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(graphqlQuery)
     })
       .then(res => {
         if (res.status !== 200 && res.status !== 201) {
@@ -296,15 +313,15 @@ class Feed extends Component {
             >
               {this.state.posts.map(post => (
                 <Post
-                  key={post._id}
-                  id={post._id}
+                  key={post.id}
+                  id={post.id}
                   author={post.creator.name}
                   date={new Date(post.createdAt).toLocaleDateString('en-US')}
                   title={post.title}
                   image={post.imageUrl}
                   content={post.content}
-                  onStartEdit={this.startEditPostHandler.bind(this, post._id)}
-                  onDelete={this.deletePostHandler.bind(this, post._id)}
+                  onStartEdit={this.startEditPostHandler.bind(this, post.id)}
+                  onDelete={this.deletePostHandler.bind(this, post.id)}
                 />
               ))}
             </Paginator>
