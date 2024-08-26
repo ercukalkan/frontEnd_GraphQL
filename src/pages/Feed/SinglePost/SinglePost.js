@@ -14,9 +14,31 @@ class SinglePost extends Component {
 
   componentDidMount() {
     const postId = this.props.match.params.postId;
-    fetch('http://localhost:8080/feed/post/' + postId, {
+    let graphqlQuery = {
+      query: `
+        {
+          getPostById(
+            id: "${postId}"
+          ) {
+            id
+            title
+            content
+            imageUrl
+            createdAt
+            creator {
+              id
+              name
+            }
+          }
+        }
+      `
+    }
+    fetch('http://localhost:8080/graphql', {
+      method: 'POST',
+      body: JSON.stringify(graphqlQuery),
       headers: {
-        Authorization: 'Bearer ' + this.props.token
+        'Authorization': 'Bearer ' + this.props.token,
+        'Content-Type': 'application/json'
       }
     })
       .then(res => {
@@ -27,11 +49,11 @@ class SinglePost extends Component {
       })
       .then(resData => {
         this.setState({
-          title: resData.post.title,
-          author: resData.post.creator.name,
-          image: `http://localhost:8080/${resData.post.imageUrl}`,
-          date: new Date(resData.post.createdAt).toLocaleDateString('en-US'),
-          content: resData.post.content
+          title: resData.data.getPostById.title,
+          author: resData.data.getPostById.creator.name,
+          image: resData.data.getPostById.imageUrl,
+          date: new Date(resData.data.getPostById.createdAt).toLocaleDateString('en-US'),
+          content: resData.data.getPostById.content
         });
       })
       .catch(err => {
